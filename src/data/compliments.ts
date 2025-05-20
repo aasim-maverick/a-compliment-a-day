@@ -71,7 +71,7 @@ export const surpriseCompliments: Compliment[] = [
   { id: 1003, text: "Your resilience in this journey amazes me, Siya", emoji: "🦋" },
   { id: 1004, text: "The struggles make our love story even more beautiful, blue feathers", emoji: "🌹" },
   { id: 1005, text: "I'm proud of how we handle the distance together, baby", emoji: "🤝" },
-  { id: 1006, text: "You're always worth the wait, my dear Twinflame Siya", emoji: "⏳" },
+  { id: 1006, text: "You're always worth the wait, my dear Twinflame", emoji: "⏳" },
   { id: 1007, text: "Even from afar, you make my heart feel full, more than full, my random bio waali", emoji: "💖" },
   { id: 1008, text: "Just imagining your smile makes my day, Siya", emoji: "😊" },
   { id: 1009, text: "You're my favorite notification, always, blue feathers", emoji: "🔔" },
