@@ -55,9 +55,23 @@ const compliments: Compliment[] = [
   { id: 48, text: "You remind me that there's good in the world", emoji: "🌞" },
   { id: 49, text: "Your perseverance is truly inspiring", emoji: "🚀" },
   { id: 50, text: "I love all your quirks and perfectly imperfect ways", emoji: "🧩" },
-  // Add more compliments to reach 365 or desired count
+  { id: 51, text: "Every mile between us makes our love grow stronger", emoji: "📏" },
+  { id: 52, text: "Your strength in handling distance inspires me daily", emoji: "💪" },
+  { id: 53, text: "Missing you is a reminder of how lucky I am to have you", emoji: "🍀" },
+  { id: 54, text: "Our love story is my favorite, even with the distance", emoji: "📖" },
+  { id: 55, text: "You're worth every second of waiting", emoji: "⌛" },
+  { id: 365, text: "A year of loving you from afar, and I'd do it all again", emoji: "🌟" }
 ];
 
 export const MILESTONE_DAYS = [7, 30, 50, 100, 150, 200, 250, 300, 365];
+
+export const surpriseCompliments: Compliment[] = [
+  { id: 1001, text: "Distance means nothing when you mean everything", emoji: "🌍" },
+  { id: 1002, text: "Every challenge we face makes our bond stronger", emoji: "⛓️" },
+  { id: 1003, text: "Your resilience in this journey amazes me", emoji: "🦋" },
+  { id: 1004, text: "The struggles make our love story even more beautiful", emoji: "🌹" },
+  { id: 1005, text: "I'm proud of how we handle the distance together", emoji: "🤝" },
+  { id: 1365, text: "Our love proves that distance is just a number", emoji: "💫" }
+];
 
 export default compliments;
