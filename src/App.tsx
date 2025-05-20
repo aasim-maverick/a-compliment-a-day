@@ -84,7 +84,7 @@ function App() {
           </main>
           
           <footer className="w-full py-4 text-center text-sm text-gray-500 dark:text-gray-400">
-            <p>Made with ❤️ for the one I love</p>
+            <p>Made with ❤️ for the one I love hehehehe</p>
           </footer>
         </div>
         
