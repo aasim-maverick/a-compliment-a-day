@@ -6,7 +6,7 @@ export interface Compliment {
 
 const compliments: Compliment[] = [
   { id: 1, text: "Your smile lights up my entire day, even from miles away", emoji: "😊" },
-  { id: 2, text: "The sound of your laugh is my favorite melody", emoji: "🎵" },
+  { id: 2, text: "Siya, the sound of your laugh is my favorite melody, keep giving me that please.", emoji: "🎵" },
   { id: 3, text: "You make my heart skip a beat every time I think of you", emoji: "💓" },
   { id: 4, text: "I'm counting down the days until I can hold you again", emoji: "🗓️" },
   { id: 5, text: "Your kindness makes the world a better place", emoji: "✨" },
