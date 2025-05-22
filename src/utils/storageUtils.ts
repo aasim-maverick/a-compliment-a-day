@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'compliment_a_day';
 
 interface ComplimentStorage {
-  lastViewedDate: string;
+  lastUnlockTime: number;
   currentDay: number;
   viewedToday: boolean;
   surpriseComplimentsViewed: number[];
@@ -9,16 +9,16 @@ interface ComplimentStorage {
 
 export const getStorageData = (): ComplimentStorage => {
   const data = localStorage.getItem(STORAGE_KEY);
-  
+
   if (!data) {
     return {
-      lastViewedDate: '',
+      lastUnlockTime: 0,
       currentDay: 1,
       viewedToday: false,
       surpriseComplimentsViewed: [],
     };
   }
-  
+
   return JSON.parse(data);
 };
 
@@ -26,53 +26,39 @@ export const setStorageData = (data: ComplimentStorage): void => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 };
 
-export const isSameDay = (date1: string, date2: string): boolean => {
-  const d1 = new Date(date1);
-  const d2 = new Date(date2);
-  
-  return (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
-  );
+export const getTimeUntilNextCompliment = (): number => {
+  const { lastUnlockTime } = getStorageData();
+  const now = Date.now();
+  const timePassed = now - lastUnlockTime;
+  const timeRemaining = Math.max(24 * 60 * 60 * 1000 - timePassed, 0);
+  return timeRemaining;
 };
 
-export const isNewDay = (): boolean => {
-  const { lastViewedDate } = getStorageData();
-  const today = new Date().toISOString().split('T')[0];
-  
-  if (!lastViewedDate) return true;
-  
-  return !isSameDay(lastViewedDate, today);
+export const canUnlockNextCompliment = (): boolean => {
+  const { lastUnlockTime } = getStorageData();
+  if (lastUnlockTime === 0) return true;
+
+  const now = Date.now();
+  const timePassed = now - lastUnlockTime;
+  return timePassed >= 24 * 60 * 60 * 1000;
 };
 
 export const markComplimentAsViewed = (): void => {
   const data = getStorageData();
-  const today = new Date().toISOString().split('T')[0];
-  
-  setStorageData({
-    ...data,
-    lastViewedDate: today,
-    viewedToday: true,
-  });
-};
 
-export const resetViewedStatus = (): void => {
-  const data = getStorageData();
-  
   setStorageData({
     ...data,
-    viewedToday: false,
+    lastUnlockTime: Date.now(),
+    viewedToday: true,
   });
 };
 
 export const advanceToNextDay = (): void => {
   const data = getStorageData();
-  const today = new Date().toISOString().split('T')[0];
-  
+
   setStorageData({
     ...data,
-    lastViewedDate: today,
+    lastUnlockTime: Date.now(),
     currentDay: data.currentDay + 1,
     viewedToday: true,
   });
@@ -80,7 +66,7 @@ export const advanceToNextDay = (): void => {
 
 export const addSurpriseCompliment = (id: number): void => {
   const data = getStorageData();
-  
+
   setStorageData({
     ...data,
     surpriseComplimentsViewed: [...data.surpriseComplimentsViewed, id],
@@ -93,12 +79,22 @@ export const hasViewedSurpriseCompliment = (id: number): boolean => {
 };
 
 export const getTodayDateFormatted = (): string => {
-  const options: Intl.DateTimeFormatOptions = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   };
-  
+
   return new Date().toLocaleDateString('en-US', options);
+};
+
+export const formatTimeRemaining = (ms: number): string => {
+  const hours = Math.floor(ms / (1000 * 60 * 60));
+  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000);
+
+  if (hours > 0) return `${hours}h ${minutes}m`;
+  if (minutes > 0) return `${minutes}m ${seconds}s`;
+  return `${seconds}s`;
 };
