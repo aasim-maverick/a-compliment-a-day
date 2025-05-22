@@ -1,7 +1,8 @@
 const STORAGE_KEY = 'compliment_a_day';
+const UNLOCK_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 interface ComplimentStorage {
-  lastUnlockTime: number;
+  lastUnlockTime: number | null;
   currentDay: number;
   viewedToday: boolean;
   surpriseComplimentsViewed: number[];
@@ -12,7 +13,7 @@ export const getStorageData = (): ComplimentStorage => {
 
   if (!data) {
     const initialData = {
-      lastUnlockTime: Date.now(), // Initialize with current time
+      lastUnlockTime: null,
       currentDay: 1,
       viewedToday: false,
       surpriseComplimentsViewed: [],
@@ -34,8 +35,7 @@ export const getTimeUntilNextCompliment = (): number => {
 
   const now = Date.now();
   const timePassed = now - lastUnlockTime;
-  const timeRemaining = Math.max(24 * 60 * 60 * 1000 - timePassed, 0);
-  return timeRemaining;
+  return Math.max(UNLOCK_INTERVAL - timePassed, 0);
 };
 
 export const canUnlockNextCompliment = (): boolean => {
@@ -44,7 +44,7 @@ export const canUnlockNextCompliment = (): boolean => {
 
   const now = Date.now();
   const timePassed = now - lastUnlockTime;
-  return timePassed >= 24 * 60 * 60 * 1000;
+  return timePassed >= UNLOCK_INTERVAL;
 };
 
 export const markComplimentAsViewed = (): void => {
@@ -96,11 +96,11 @@ export const getTodayDateFormatted = (): string => {
 export const formatTimeRemaining = (ms: number): string => {
   if (!ms || isNaN(ms)) return '';
 
-  const hours = Math.floor(ms / (1000 * 60 * 60));
-  const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+  const minutes = Math.floor(ms / (1000 * 60));
+  const seconds = Math.floor((ms % (1000 * 60)) / 1000);
 
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
+  if (minutes > 0) {
+    return `${minutes}m ${seconds}s`;
   }
-  return `${minutes}m`;
+  return `${seconds}s`;
 };

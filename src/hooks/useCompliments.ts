@@ -18,24 +18,24 @@ export const useCompliments = () => {
   const [isMilestone, setIsMilestone] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const [isLocked, setIsLocked] = useState(false);
 
   const updateTimeRemaining = useCallback(() => {
-    if (viewedToday) {
-      const remaining = getTimeUntilNextCompliment();
-      setTimeRemaining(formatTimeRemaining(remaining));
-      return remaining > 0;
-    }
-    return false;
-  }, [viewedToday]);
+    const remaining = getTimeUntilNextCompliment();
+    const formattedTime = formatTimeRemaining(remaining);
+    setTimeRemaining(formattedTime);
+    return remaining > 0;
+  }, []);
 
   // Initialize on mount
   useEffect(() => {
-    const { currentDay, viewedToday } = getStorageData();
+    const { currentDay, lastUnlockTime } = getStorageData();
     setDay(currentDay);
 
-    // Check if 24 hours have passed
-    const isLocked = !canUnlockNextCompliment();
-    setViewedToday(isLocked);
+    // Check if compliment is locked
+    const locked = lastUnlockTime !== null && !canUnlockNextCompliment();
+    setIsLocked(locked);
+    setViewedToday(locked);
 
     // Get current compliment
     const complimentIndex = (currentDay - 1) % compliments.length;
@@ -45,34 +45,39 @@ export const useCompliments = () => {
     setIsMilestone(MILESTONE_DAYS.includes(currentDay));
 
     // Initial time remaining update
-    if (isLocked) {
+    if (locked) {
       updateTimeRemaining();
     }
   }, [updateTimeRemaining]);
 
-  // Update time remaining every minute
+  // Update time remaining every second when locked
   useEffect(() => {
-    if (!viewedToday) return;
+    if (!isLocked) {
+      setTimeRemaining('');
+      return;
+    }
 
     const interval = setInterval(() => {
       const stillLocked = updateTimeRemaining();
       if (!stillLocked) {
+        setIsLocked(false);
         setViewedToday(false);
         clearInterval(interval);
       }
-    }, 60000);
+    }, 1000);
 
     return () => clearInterval(interval);
-  }, [viewedToday, updateTimeRemaining]);
+  }, [isLocked, updateTimeRemaining]);
 
   const viewNextCompliment = () => {
-    if (!viewedToday && canUnlockNextCompliment()) {
+    if (!isLocked && canUnlockNextCompliment()) {
       const newDay = day + 1;
       const complimentIndex = (newDay - 1) % compliments.length;
 
       setDay(newDay);
       setCurrentCompliment(compliments[complimentIndex]);
       setViewedToday(true);
+      setIsLocked(true);
 
       // Check if milestone day
       const isNewMilestone = MILESTONE_DAYS.includes(newDay);
@@ -90,8 +95,9 @@ export const useCompliments = () => {
   };
 
   const viewTodayCompliment = () => {
-    if (!viewedToday && canUnlockNextCompliment()) {
+    if (!isLocked && canUnlockNextCompliment()) {
       setViewedToday(true);
+      setIsLocked(true);
       markComplimentAsViewed();
       updateTimeRemaining();
 
