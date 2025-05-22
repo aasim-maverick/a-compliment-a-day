@@ -8,6 +8,7 @@ import MilestoneConfetti from './components/MilestoneConfetti';
 import FloatingHearts from './components/FloatingHearts';
 import SurpriseComplimentModal from './components/SurpriseComplimentModal';
 import { Compliment } from './data/compliments';
+import { canUnlockNextCompliment } from './utils/storageUtils';
 
 function App() {
   const {
@@ -17,7 +18,6 @@ function App() {
     isMilestone,
     showConfetti,
     timeRemaining,
-    canUnlockNext,
     viewNextCompliment,
     viewTodayCompliment,
     getSurpriseCompliment,
@@ -41,6 +41,10 @@ function App() {
 
   const handleNextCompliment = () => {
     if (!viewedToday) {
+      // First time viewing today's compliment
+      viewTodayCompliment();
+    } else if (canUnlockNextCompliment()) {
+      // Timer has finished, advance to next day
       viewNextCompliment();
     }
   };
@@ -53,6 +57,9 @@ function App() {
   const closeSurpriseModal = () => {
     setSurpriseCompliment(null);
   };
+
+  // Button is disabled if we've viewed today AND timer hasn't finished yet
+  const isNextDisabled = viewedToday && !canUnlockNextCompliment();
 
   if (isLoading) {
     return (
@@ -79,7 +86,7 @@ function App() {
               <ControlButtons
                   onNextCompliment={handleNextCompliment}
                   onSurpriseMe={handleSurpriseMe}
-                  isNextDisabled={!canUnlockNext}
+                  isNextDisabled={isNextDisabled}
                   timeRemaining={timeRemaining}
               />
             </main>
