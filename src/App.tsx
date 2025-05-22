@@ -17,6 +17,7 @@ function App() {
     isMilestone,
     showConfetti,
     timeRemaining,
+    canUnlockNext,
     viewNextCompliment,
     viewTodayCompliment,
     getSurpriseCompliment,
@@ -78,7 +79,7 @@ function App() {
               <ControlButtons
                   onNextCompliment={handleNextCompliment}
                   onSurpriseMe={handleSurpriseMe}
-                  isNextDisabled={viewedToday}
+                  isNextDisabled={!canUnlockNext}
                   timeRemaining={timeRemaining}
               />
             </main>
