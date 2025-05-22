@@ -11,6 +11,7 @@ import {
   formatTimeRemaining
 } from '../utils/storageUtils';
 
+
 export const useCompliments = () => {
   const [currentCompliment, setCurrentCompliment] = useState<Compliment | null>(null);
   const [day, setDay] = useState(1);
@@ -18,70 +19,89 @@ export const useCompliments = () => {
   const [isMilestone, setIsMilestone] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
-  const [canUnlockNext, setCanUnlockNext] = useState(false);
+  const [isLocked, setIsLocked] = useState(false);
+
 
   const updateTimeRemaining = useCallback(() => {
     const remaining = getTimeUntilNextCompliment();
     const formattedTime = formatTimeRemaining(remaining);
     setTimeRemaining(formattedTime);
-
-    // Update whether we can unlock the next compliment
-    const canUnlock = canUnlockNextCompliment();
-    setCanUnlockNext(canUnlock);
-
     return remaining > 0;
   }, []);
 
+
   // Initialize on mount
   useEffect(() => {
-    const { currentDay, lastUnlockTime, viewedToday: hasViewedToday } = getStorageData();
+    const { currentDay, lastUnlockTime } = getStorageData();
     setDay(currentDay);
-    setViewedToday(hasViewedToday);
+
+
+    // Check if compliment is locked
+    const locked = lastUnlockTime !== null && !canUnlockNextCompliment();
+    setIsLocked(locked);
+    setViewedToday(locked);
+
 
     // Get current compliment
     const complimentIndex = (currentDay - 1) % compliments.length;
     setCurrentCompliment(compliments[complimentIndex]);
 
+
     // Check if today is a milestone day
     setIsMilestone(MILESTONE_DAYS.includes(currentDay));
 
-    // Update time remaining and unlock status
-    updateTimeRemaining();
+
+    // Initial time remaining update
+    if (locked) {
+      updateTimeRemaining();
+    }
   }, [updateTimeRemaining]);
 
-  // Update time remaining every second when there's a timer running
+
+  // Update time remaining every second when locked
   useEffect(() => {
-    // Only run timer if we have viewed today's compliment and can't unlock next yet
-    if (!viewedToday || canUnlockNext) {
+    if (!isLocked) {
       setTimeRemaining('');
       return;
     }
 
+
     const interval = setInterval(() => {
-      updateTimeRemaining();
+      const stillLocked = updateTimeRemaining();
+      if (!stillLocked) {
+        setIsLocked(false);
+        setViewedToday(false);
+        clearInterval(interval);
+      }
     }, 1000);
 
+
     return () => clearInterval(interval);
-  }, [viewedToday, canUnlockNext, updateTimeRemaining]);
+  }, [isLocked, updateTimeRemaining]);
+
 
   const viewNextCompliment = () => {
-    if (canUnlockNext) {
+    if (!isLocked && canUnlockNextCompliment()) {
       const newDay = day + 1;
       const complimentIndex = (newDay - 1) % compliments.length;
+
 
       setDay(newDay);
       setCurrentCompliment(compliments[complimentIndex]);
       setViewedToday(true);
-      setCanUnlockNext(false);
+      setIsLocked(true);
+
 
       // Check if milestone day
       const isNewMilestone = MILESTONE_DAYS.includes(newDay);
       setIsMilestone(isNewMilestone);
 
+
       if (isNewMilestone) {
         setShowConfetti(true);
         setTimeout(() => setShowConfetti(false), 5000);
       }
+
 
       // Update storage
       advanceToNextDay();
@@ -89,12 +109,14 @@ export const useCompliments = () => {
     }
   };
 
+
   const viewTodayCompliment = () => {
-    if (!viewedToday) {
+    if (!isLocked && canUnlockNextCompliment()) {
       setViewedToday(true);
-      setCanUnlockNext(false);
+      setIsLocked(true);
       markComplimentAsViewed();
       updateTimeRemaining();
+
 
       if (isMilestone) {
         setShowConfetti(true);
@@ -103,22 +125,28 @@ export const useCompliments = () => {
     }
   };
 
+
   const getSurpriseCompliment = (): Compliment => {
     const availableCompliments = compliments.filter(
         comp => !hasViewedSurpriseCompliment(comp.id) && comp.id !== currentCompliment?.id
     );
 
+
     const surprisePool = availableCompliments.length > 0
         ? availableCompliments
         : compliments.filter(comp => comp.id !== currentCompliment?.id);
 
+
     const randomIndex = Math.floor(Math.random() * surprisePool.length);
     const surpriseCompliment = surprisePool[randomIndex];
 
+
     addSurpriseCompliment(surpriseCompliment.id);
+
 
     return surpriseCompliment;
   };
+
 
   return {
     currentCompliment,
@@ -127,7 +155,6 @@ export const useCompliments = () => {
     isMilestone,
     showConfetti,
     timeRemaining,
-    canUnlockNext,
     viewNextCompliment,
     viewTodayCompliment,
     getSurpriseCompliment,
