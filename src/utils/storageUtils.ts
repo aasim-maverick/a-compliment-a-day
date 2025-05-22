@@ -11,12 +11,14 @@ export const getStorageData = (): ComplimentStorage => {
   const data = localStorage.getItem(STORAGE_KEY);
 
   if (!data) {
-    return {
-      lastUnlockTime: 0,
+    const initialData = {
+      lastUnlockTime: Date.now(), // Initialize with current time
       currentDay: 1,
       viewedToday: false,
       surpriseComplimentsViewed: [],
     };
+    setStorageData(initialData);
+    return initialData;
   }
 
   return JSON.parse(data);
@@ -28,6 +30,8 @@ export const setStorageData = (data: ComplimentStorage): void => {
 
 export const getTimeUntilNextCompliment = (): number => {
   const { lastUnlockTime } = getStorageData();
+  if (!lastUnlockTime) return 0;
+
   const now = Date.now();
   const timePassed = now - lastUnlockTime;
   const timeRemaining = Math.max(24 * 60 * 60 * 1000 - timePassed, 0);
@@ -36,7 +40,7 @@ export const getTimeUntilNextCompliment = (): number => {
 
 export const canUnlockNextCompliment = (): boolean => {
   const { lastUnlockTime } = getStorageData();
-  if (lastUnlockTime === 0) return true;
+  if (!lastUnlockTime) return true;
 
   const now = Date.now();
   const timePassed = now - lastUnlockTime;
@@ -90,11 +94,13 @@ export const getTodayDateFormatted = (): string => {
 };
 
 export const formatTimeRemaining = (ms: number): string => {
+  if (!ms || isNaN(ms)) return '';
+
   const hours = Math.floor(ms / (1000 * 60 * 60));
   const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((ms % (1000 * 60)) / 1000);
 
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes}m`;
 };
