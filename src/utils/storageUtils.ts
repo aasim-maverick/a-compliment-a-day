@@ -1,5 +1,5 @@
 const STORAGE_KEY = 'compliment_a_day';
-const UNLOCK_INTERVAL = 5 * 1000; // 24 hours in milliseconds
+const UNLOCK_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
 
 interface ComplimentStorage {
