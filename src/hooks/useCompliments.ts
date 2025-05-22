@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import compliments, { Compliment, MILESTONE_DAYS } from '../data/compliments';
+import compliments, { Compliment, MILESTONE_DAYS, surpriseCompliments } from '../data/compliments';
 import {
   getStorageData,
   canUnlockNextCompliment,
@@ -109,13 +109,13 @@ export const useCompliments = () => {
   };
 
   const getSurpriseCompliment = (): Compliment => {
-    const availableCompliments = compliments.filter(
+    const availableCompliments = surpriseCompliments.filter(
         comp => !hasViewedSurpriseCompliment(comp.id) && comp.id !== currentCompliment?.id
     );
 
     const surprisePool = availableCompliments.length > 0
         ? availableCompliments
-        : compliments.filter(comp => comp.id !== currentCompliment?.id);
+        : surpriseCompliments;
 
     const randomIndex = Math.floor(Math.random() * surprisePool.length);
     const surpriseCompliment = surprisePool[randomIndex];
