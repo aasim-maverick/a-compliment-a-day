@@ -18,6 +18,7 @@ function App() {
     isMilestone,
     showConfetti,
     timeRemaining,
+    canUnlock,
     viewNextCompliment,
     viewTodayCompliment,
     getSurpriseCompliment,
@@ -43,8 +44,8 @@ function App() {
     if (!viewedToday) {
       // First time viewing today's compliment
       viewTodayCompliment();
-    } else if (canUnlockNextCompliment()) {
-      // Timer has finished, advance to next day
+    } else {
+      // Advance to next day's compliment
       viewNextCompliment();
     }
   };
@@ -58,8 +59,8 @@ function App() {
     setSurpriseCompliment(null);
   };
 
-  // Button is disabled if we've viewed today AND timer hasn't finished yet
-  const isNextDisabled = viewedToday && !canUnlockNextCompliment();
+  // Button is disabled if we can't unlock yet (based purely on timestamp)
+  const isNextDisabled = !canUnlock;
 
   if (isLoading) {
     return (
